@@ -6,7 +6,7 @@ export default class Manager {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  private static app: Application;
+  public static app: Application;
 
   private static currentScene: IScene;
 
