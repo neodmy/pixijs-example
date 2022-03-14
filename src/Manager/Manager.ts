@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { Application } from 'pixi.js';
 import IScene from './IScene';
+import Keyboard from '../Keyboard';
 
 export default class Manager {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -34,7 +35,7 @@ export default class Manager {
       width,
       height,
     });
-
+    Keyboard.initialize();
     Manager.app.ticker.add(Manager.update);
   }
 
