@@ -4,6 +4,7 @@ import {
 } from 'pixi.js';
 import Manager from '../Manager/Manager';
 import IScene from '../Manager/IScene';
+import Keyboard from '../Keyboard';
 
 export default class GameScene extends Container implements IScene {
   private player: AnimatedSprite;
@@ -26,7 +27,7 @@ export default class GameScene extends Container implements IScene {
     right: this.playerAnimations.slice(6, 7),
     walkRight: this.playerAnimations.slice(6, 9),
     left: this.playerAnimations.slice(9, 10),
-    walkLeft: this.playerAnimations.slice(9, 11),
+    walkLeft: this.playerAnimations.slice(9, 12),
   };
 
   constructor() {
@@ -34,6 +35,7 @@ export default class GameScene extends Container implements IScene {
 
     this.player = new AnimatedSprite(this.playerStates.down);
     this.player.animationSpeed = this.ANIMATION_SPEED;
+    this.player.loop = false;
 
     this.player.anchor.set(0.5);
     this.player.x = Manager.width / 2;
@@ -42,12 +44,10 @@ export default class GameScene extends Container implements IScene {
 
     this.vx = 0;
     this.vy = 0;
-
-    document.addEventListener('keydown', this.onKeyDown.bind(this));
-    document.addEventListener('keyup', this.onKeyUp.bind(this));
   }
 
   public update(framesPassed: number): void {
+    this.movePlayer();
     this.player.x += this.vx * framesPassed;
     this.player.y += this.vy * framesPassed;
 
@@ -73,61 +73,103 @@ export default class GameScene extends Container implements IScene {
     }
   }
 
-  private onKeyDown(e: KeyboardEvent): void {
-    const keyCodeMap: { [key: string]: Function } = {
-      ArrowLeft: (): void => {
-        if (!this.player.playing) {
-          this.player.textures = this.playerStates.walkLeft;
-          this.player.play();
-        }
-        this.vx = -this.velocity;
-      },
-      ArrowRight: (): void => {
-        if (!this.player.playing) {
-          this.player.textures = this.playerStates.walkRight;
-          this.player.play();
-        }
-        this.vx = +this.velocity;
-      },
-      ArrowDown: (): void => {
-        if (!this.player.playing) {
-          this.player.textures = this.playerStates.walkDown;
-          this.player.play();
-        }
-        this.vy = +this.velocity;
-      },
-      ArrowUp: (): void => {
-        if (!this.player.playing) {
-          this.player.textures = this.playerStates.walkUp;
-          this.player.play();
-        }
-        this.vy = -this.velocity;
-      },
-      default: (): void => {},
-    };
-    (keyCodeMap[e.code] || keyCodeMap.default)();
+  private movePlayer(): void {
+    const downPressed = Keyboard.state.get('ArrowDown');
+    const upPressed = Keyboard.state.get('ArrowUp');
+    const leftPressed = Keyboard.state.get('ArrowLeft');
+    const rightPressed = Keyboard.state.get('ArrowRight');
+
+    if (downPressed) {
+      if (!this.player.playing) {
+        this.player.textures = this.playerStates.walkDown;
+        this.player.play();
+      }
+      this.vy = +this.velocity;
+    }
+    if (upPressed) {
+      if (!this.player.playing) {
+        this.player.textures = this.playerStates.walkUp;
+        this.player.play();
+      }
+      this.vy = -this.velocity;
+    }
+
+    if (rightPressed) {
+      if (!this.player.playing) {
+        this.player.textures = this.playerStates.walkRight;
+        this.player.play();
+      }
+      this.vx = +this.velocity;
+    }
+
+    if (leftPressed) {
+      if (!this.player.playing) {
+        this.player.textures = this.playerStates.walkLeft;
+        this.player.play();
+      }
+      this.vx = -this.velocity;
+    }
+
+    if (!upPressed && !downPressed) this.vy = 0;
+    if (!leftPressed && !rightPressed) this.vx = 0;
   }
 
-  private onKeyUp(e: KeyboardEvent): void {
-    const keyCodeMap: { [key: string]: Function } = {
-      ArrowLeft: (): void => {
-        this.player.textures = this.playerStates.left;
-        this.vx = 0;
-      },
-      ArrowRight: (): void => {
-        this.player.textures = this.playerStates.right;
-        this.vx = 0;
-      },
-      ArrowDown: (): void => {
-        this.player.textures = this.playerStates.down;
-        this.vy = 0;
-      },
-      ArrowUp: (): void => {
-        this.player.textures = this.playerStates.up;
-        this.vy = 0;
-      },
-      default: (): void => {},
-    };
-    (keyCodeMap[e.code] || keyCodeMap.default)();
-  }
+  // private onKeyDown(e: KeyboardEvent): void {
+  //   const keyCodeMap: { [key: string]: Function } = {
+  //     ArrowLeft: (): void => {
+  //       if (!this.player.playing) {
+  //         this.player.textures = this.playerStates.walkLeft;
+  //         this.player.play();
+  //       }
+  //       this.vx = -this.velocity;
+  //     },
+  //     ArrowRight: (): void => {
+  //       if (!this.player.playing) {
+  //         this.player.textures = this.playerStates.walkRight;
+  //         this.player.play();
+  //       }
+  //       this.vx = +this.velocity;
+  //     },
+  //     ArrowDown: (): void => {
+  //       if (!this.player.playing) {
+  //         this.player.textures = this.playerStates.walkDown;
+  //         this.player.play();
+  //       }
+  //       this.vy = +this.velocity;
+  //     },
+  //     ArrowUp: (): void => {
+  //       if (!this.player.playing) {
+  //         this.player.textures = this.playerStates.walkUp;
+  //         this.player.play();
+  //       }
+  //       this.vy = -this.velocity;
+  //     },
+  //     default: (): void => {},
+  //   };
+  //   (keyCodeMap[e.code] || keyCodeMap.default)();
+  //   console.log(Keyboard.state);
+  // }
+
+  // private onKeyUp(e: KeyboardEvent): void {
+  //   const keyCodeMap: { [key: string]: Function } = {
+  //     ArrowLeft: (): void => {
+  //       // this.player.textures = this.playerStates.left;
+  //       this.vx = 0;
+  //     },
+  //     ArrowRight: (): void => {
+  //       // this.player.textures = this.playerStates.right;
+  //       this.vx = 0;
+  //     },
+  //     ArrowDown: (): void => {
+  //       // this.player.textures = this.playerStates.down;
+  //       this.vy = 0;
+  //     },
+  //     ArrowUp: (): void => {
+  //       // this.player.textures = this.playerStates.up;
+  //       this.vy = 0;
+  //     },
+  //     default: (): void => {},
+  //   };
+  //   (keyCodeMap[e.code] || keyCodeMap.default)();
+  // }
 }
