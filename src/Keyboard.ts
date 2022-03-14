@@ -1,5 +1,5 @@
 class Keyboard {
-  public static readonly state: Map<string, boolean>;
+  public static readonly state: Map<string, boolean> = new Map();
 
   public static initialize() {
     document.addEventListener('keydown', Keyboard.keyDown);
